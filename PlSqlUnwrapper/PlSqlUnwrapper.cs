@@ -1,5 +1,7 @@
 ﻿
-using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using System.IO;
+using System;
+using System.IO.Compression;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -7,7 +9,7 @@ namespace PlSqlUnwrapper
 {
     public static class PlSqlUnwrapper
     {
-        private static byte[] substitutionTable =
+        private static readonly byte[] substitutionTable =
         {
             0x3D, 0x65, 0x85, 0xB3, 0x18, 0xDB, 0xE2, 0x87, 0xF1, 0x52, 0xAB, 0x63, 0x4B, 0xB5, 0xA0, 0x5F,
             0x7D, 0x68, 0x7B, 0x9B, 0x24, 0xC2, 0x28, 0x67, 0x8A, 0xDE, 0xA4, 0x26, 0x1E, 0x03, 0xEB, 0x17,
@@ -32,18 +34,20 @@ namespace PlSqlUnwrapper
             Match m = Regex.Match(wrappedPlSql, @"wrapped\s*\r?\n(.*\n){19}");
             int pos = m.Index + m.Length;
             string base64Str = wrappedPlSql.Substring(pos).TrimEnd();
-            byte[] data = Convert.FromBase64String(base64Str);
 
-            for (int i = 20; i < data.Length; i++)
+            int headerSize = 22;
+
+            byte[] data = Convert.FromBase64String(base64Str);
+            for (int i = headerSize; i < data.Length; i++)
                 data[i] = substitutionTable[data[i]];
 
             string unwrappedPlSql = "";
-            using (MemoryStream inputStream = new MemoryStream(data, 20, data.GetLength(0) - 20))
-            using (InflaterInputStream decompressionStream = new(inputStream))
+            using (MemoryStream inputStream = new MemoryStream(data, headerSize, data.GetLength(0) - headerSize))
+            using (DeflateStream decompressionStream = new DeflateStream(inputStream, CompressionMode.Decompress))
             using (StreamReader reader = new StreamReader(decompressionStream, encoding))
                 unwrappedPlSql = reader.ReadToEnd();
 
-            return unwrappedPlSql;
+            return unwrappedPlSql.TrimEnd('\0');
         }
     }
 }

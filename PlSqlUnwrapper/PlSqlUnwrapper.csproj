@@ -1,13 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard1.1</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="SharpZipLib" Version="1.4.2" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard1.1</TargetFrameworks>
+		<PackageId>PlSqlUnwrapper</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>Robert Baron (Machine Cognitis)</Authors>
+		<Owners>Robert Baron (Machine Cognitis)</Owners>
+		<Description>Unwraps wrapped Oracle PL/SQL code. Supports multiple encodings, ASCII, UTF-8, Unicode, Latin1 (ISO-8859-1).</Description>
+		<Copyright>Copyright (c) 2024 Robert Baron, Machine Cognitis</Copyright>
+		<Tags>PL/SQL;wrapped;unwrapper;Oracle</Tags>
+		<ReleaseNotes>Initial release.</ReleaseNotes>
+		<Title>PL/SQL Code Unwrapper for .NET</Title>
+		<Summary>PL/SQL Code Unwrapper for .NET</Summary>
+		<LicenseUrl>https://github.com/MachineCognitis/PlSqlUnwrapper?tab=MIT-1-ov-file</LicenseUrl>
+		<ProjectUrl>https://github.com/MachineCognitis/PlSqlUnwrapper/</ProjectUrl>
+	</PropertyGroup>
 
 </Project>

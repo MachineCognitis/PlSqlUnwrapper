@@ -1,11 +1,52 @@
+
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace PlSqlUnwrapper.UnitTests
 {
     [TestClass]
-    public class UnitTest1
+    public partial class UnitTest1
     {
+        [TestMethod]
+        public void TestLatin1()
+        {
+            string wrappedPlSql = @"
+CREATE OR REPLACE FUNCTION get_latin1_string wrapped 
+a000000
+1f
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+abcd
+8
+8f b6
+HQrJ6ceqqsLh5Gs63gvHZtDzzoUwg8eZgcfLCNL+XlquYvRyoVb6R4JfltE+l0cM6ufAsr2y
+m17nx3TAM7h0ZQmldIsJaedtKMu9m9LHB5n2BKsEEaPHrb5FEpKo2boxxRatSejtw8I5GBVf
+rPKjx76SvhZTmEDb+FdAMJKIFQKIpjusSSY=";
+
+            string unwrappedPlSql = PlSqlUnwrapper.Unwrap(wrappedPlSql, Encoding.Latin1).Replace("\n", "\r\n");
+
+            Assert.AreEqual(unwrappedPlSql, 
+@"FUNCTION get_latin1_string RETURN VARCHAR2 IS
+  V_STRING VARCHAR2(100);
+BEGIN
+  V_STRING := ""Café"";
+  RETURN V_STRING;
+END GET_LATIN1_STRING;
+");
+        }
+
         [TestMethod]
         public void TestFunctions()
         {
@@ -14,7 +55,7 @@ namespace PlSqlUnwrapper.UnitTests
             foreach (string file in wrapped)
             {
                 string wrappedPlSql = File.ReadAllText(file);
-                string unwrappedPlSql = PlSqlUnwrapper.Unwrap(wrappedPlSql, Encoding.Latin1).Replace("\n", "\r\n").TrimEnd('\0');
+                string unwrappedPlSql = PlSqlUnwrapper.Unwrap(wrappedPlSql, Encoding.Latin1).Replace("\n", "\r\n");
                 string plSql = File.ReadAllText(file.Replace(".wrapped", ""));
                 Assert.AreEqual(unwrappedPlSql, plSql);
             }
@@ -28,7 +69,7 @@ namespace PlSqlUnwrapper.UnitTests
             foreach (string file in wrapped)
             {
                 string wrappedPlSql = File.ReadAllText(file);
-                string unwrappedPlSql = PlSqlUnwrapper.Unwrap(wrappedPlSql, Encoding.Latin1).Replace("\n", "\r\n").TrimEnd('\0');
+                string unwrappedPlSql = PlSqlUnwrapper.Unwrap(wrappedPlSql, Encoding.Latin1).Replace("\n", "\r\n");
                 string plSql = File.ReadAllText(file.Replace(".wrapped", ""));
                 Assert.AreEqual(unwrappedPlSql, plSql);
             }
@@ -42,18 +83,24 @@ namespace PlSqlUnwrapper.UnitTests
             foreach (string file in wrapped)
             {
                 string wrappedPlSql = File.ReadAllText(file);
-                string unwrappedPlSql = PlSqlUnwrapper.Unwrap(wrappedPlSql, Encoding.Latin1).Replace("\n", "\r\n").TrimEnd('\0');
+                string unwrappedPlSql = PlSqlUnwrapper.Unwrap(wrappedPlSql, Encoding.Latin1).Replace("\n", "\r\n");
                 string plSql = File.ReadAllText(file.Replace(".wrapped", ""));
                 Assert.AreEqual(unwrappedPlSql, plSql);
             }
         }
+
+        [GeneratedRegex(@"CREATE\s+(OR\s+REPLACE\s+)?(EDITIONABLE\s+)?(PROCEDURE|FUNCTION)\s+""(\w+)""\.""(\w+)""")]
+        private static partial Regex FunctionRegex();
+
+        [GeneratedRegex(@"CREATE\s+(OR\s+REPLACE\s+)?(PROCEDURE|FUNCTION)\s+(\w+)")]
+        private static partial Regex FunctionRegex2();
 
         [TestMethod]
         public void CreateFunctionTests()
         {
             string plsqlWrapped = File.ReadAllText(@"D:\Conversion\Parser\OracleForms\Database\Functions.txt");
             string[] wrapped = plsqlWrapped.Split("\r\n/\r\n");
-            Dictionary<string, string> wrappedElements = new Dictionary<string, string>();
+            Dictionary<string, string> wrappedElements = [];
 
             foreach (string wrap in wrapped)
             {
@@ -61,43 +108,49 @@ namespace PlSqlUnwrapper.UnitTests
 
                 if (pos > 0)
                 {
-                    Match m = Regex.Match(wrap, @"CREATE\s+(OR\s+REPLACE\s+)?(EDITIONABLE\s+)?(PROCEDURE|FUNCTION)\s+""(\w+)""\.""(\w+)""");
+                    Match m = FunctionRegex().Match(wrap);
                     string name = m.Groups[5].ToString();
-                    string code = $"{m.Groups[3].ToString()} {name} " + wrap.Substring(pos).Trim();
+                    string code = $"{m.Groups[3]} {name} " + wrap[pos..].Trim();
                     wrappedElements[name.ToUpperInvariant()] = code;
                 }
             }
 
             string plsqlUnwrapped = File.ReadAllText(@"D:\Conversion\Parser\OracleForms\Database\Functions oddgen.txt");
             string[] unwrapped = plsqlUnwrapped.Split("\r\n/\r\n");
-            Dictionary<string, string> unwrappedElements = new Dictionary<string, string>();
+            Dictionary<string, string> unwrappedElements = [];
 
             foreach (string unwrap in unwrapped)
             {
                 if (string.IsNullOrWhiteSpace(unwrap))
                     continue;
 
-                Match m = Regex.Match(unwrap, @"CREATE\s+(OR\s+REPLACE\s+)?(PROCEDURE|FUNCTION)\s+(\w+)");
+                Match m = FunctionRegex2().Match(unwrap);
                 string name = m.Groups[3].ToString();
-                unwrappedElements[name.ToUpperInvariant()] = unwrap.Substring(m.Groups[2].Index);
+                unwrappedElements[name.ToUpperInvariant()] = unwrap[m.Groups[2].Index..];
             }
 
             foreach (string name in wrappedElements.Keys)
             {
-                if (unwrappedElements.ContainsKey(name))
+                if (unwrappedElements.TryGetValue(name, out string? value))
                 {
                     File.WriteAllText($@"C:\Users\Robert\Documents\MCE\Projets\GitHub\PlSqlUnwrapper\PlSqlUnwrapper.UnitTests\TestFiles\Functions\{name}.wrapped.txt", wrappedElements[name]);
-                    File.WriteAllText($@"C:\Users\Robert\Documents\MCE\Projets\GitHub\PlSqlUnwrapper\PlSqlUnwrapper.UnitTests\TestFiles\Functions\{name}.txt", unwrappedElements[name]);
+                    File.WriteAllText($@"C:\Users\Robert\Documents\MCE\Projets\GitHub\PlSqlUnwrapper\PlSqlUnwrapper.UnitTests\TestFiles\Functions\{name}.txt", value);
                 }
             }
         }
+
+        [GeneratedRegex(@"CREATE\s+(OR\s+REPLACE\s+)?(EDITIONABLE\s+)?(PROCEDURE|FUNCTION)\s+""(\w+)""\.""(\w+)""")]
+        private static partial Regex ProcedureRegex();
+
+        [GeneratedRegex(@"CREATE\s+(OR\s+REPLACE\s+)?(PROCEDURE|FUNCTION)\s+(\w+)")]
+        private static partial Regex ProcedureRegex2();
 
         [TestMethod]
         public void CreateProcedureTests()
         {
             string plsqlWrapped = File.ReadAllText(@"D:\Conversion\Parser\OracleForms\Database\Procedures.txt");
             string[] wrapped = plsqlWrapped.Split("\r\n/\r\n");
-            Dictionary<string, string> wrappedElements = new Dictionary<string, string>();
+            Dictionary<string, string> wrappedElements = [];
 
             foreach (string wrap in wrapped)
             {
@@ -105,56 +158,64 @@ namespace PlSqlUnwrapper.UnitTests
 
                 if (pos > 0)
                 {
-                    Match m = Regex.Match(wrap, @"CREATE\s+(OR\s+REPLACE\s+)?(EDITIONABLE\s+)?(PROCEDURE|FUNCTION)\s+""(\w+)""\.""(\w+)""");
+                    Match m = ProcedureRegex().Match(wrap);
                     string name = m.Groups[5].ToString();
-                    string code = $"{m.Groups[3].ToString()} {name} " + wrap.Substring(pos).Trim();
+                    string code = $"{m.Groups[3]} {name} " + wrap[pos..].Trim();
                     wrappedElements[name.ToUpperInvariant()] = code;
                 }
             }
 
             string plsqlUnwrapped = File.ReadAllText(@"D:\Conversion\Parser\OracleForms\Database\Procedures oddgen.txt");
             string[] unwrapped = plsqlUnwrapped.Split("\r\n/\r\n");
-            Dictionary<string, string> unwrappedElements = new Dictionary<string, string>();
+            Dictionary<string, string> unwrappedElements = [];
 
             foreach (string unwrap in unwrapped)
             {
                 if (string.IsNullOrWhiteSpace(unwrap))
                     continue;
 
-                Match m = Regex.Match(unwrap, @"CREATE\s+(OR\s+REPLACE\s+)?(PROCEDURE|FUNCTION)\s+(\w+)");
+                Match m = ProcedureRegex2().Match(unwrap);
                 string name = m.Groups[3].ToString();
-                unwrappedElements[name.ToUpperInvariant()] = unwrap.Substring(m.Groups[2].Index);
+                unwrappedElements[name.ToUpperInvariant()] = unwrap[m.Groups[2].Index..];
             }
 
             foreach (string name in wrappedElements.Keys)
             {
-                if (unwrappedElements.ContainsKey(name))
+                if (unwrappedElements.TryGetValue(name, out string? value))
                 {
                     File.WriteAllText($@"C:\Users\Robert\Documents\MCE\Projets\GitHub\PlSqlUnwrapper\PlSqlUnwrapper.UnitTests\TestFiles\Procedures\{name}.wrapped.txt", wrappedElements[name]);
-                    File.WriteAllText($@"C:\Users\Robert\Documents\MCE\Projets\GitHub\PlSqlUnwrapper\PlSqlUnwrapper.UnitTests\TestFiles\Procedures\{name}.txt", unwrappedElements[name]);
+                    File.WriteAllText($@"C:\Users\Robert\Documents\MCE\Projets\GitHub\PlSqlUnwrapper\PlSqlUnwrapper.UnitTests\TestFiles\Procedures\{name}.txt", value);
                 }
             }
         }
+
+        [GeneratedRegex(@"wrapped")]
+        private static partial Regex PackageBodyRegex();
+
+        [GeneratedRegex(@"CREATE\s+OR\s+REPLACE\s+EDITIONABLE\s+PACKAGE BODY\s+""(\w+)""")]
+        private static partial Regex PackageBodyRegex2();
+
+        [GeneratedRegex(@"CREATE\s+(OR\s+REPLACE\s+)?(PROCEDURE|FUNCTION|PACKAGE BODY)\s+(\w+)")]
+        private static partial Regex PackageBodyRegex3();
 
         [TestMethod]
         public void CreatePackageBodyTests()
         {
             string plsqlWrapped = File.ReadAllText(@"D:\Conversion\Parser\OracleForms\Database\Package bodies.txt");
             string[] wrapped = plsqlWrapped.Split("\r\n/\r\n");
-            Dictionary<string, string> wrappedElements = new Dictionary<string, string>();
+            Dictionary<string, string> wrappedElements = [];
 
             foreach (string wrap in wrapped)
             {
-                Match m = Regex.Match(wrap, @"wrapped");
+                Match m = PackageBodyRegex().Match(wrap);
 
                 if (m.Success)
                 {
-                    string name = "";
-                    Match m1 = Regex.Match(wrap, @"CREATE\s+OR\s+REPLACE\s+EDITIONABLE\s+PACKAGE BODY\s+""(\w+)""");
+                    Match m1 = PackageBodyRegex2().Match(wrap);
                     if (m1.Success)
                     {
-                        name = m1.Groups[1].ToString();
-                        string code = wrap.Substring(m.Groups[0].Index + m.Groups[0].Length);
+                        string name = m1.Groups[1].ToString();
+                        string code = wrap[(m.Groups[0].Index + m.Groups[0].Length)..];
                         wrappedElements[name.ToUpperInvariant()] = $"PACKAGE BODY {name} wrapped {code}";
                     }
                 }
@@ -162,27 +223,26 @@ namespace PlSqlUnwrapper.UnitTests
 
             string plsqlUnwrapped = File.ReadAllText(@"D:\Conversion\Parser\OracleForms\Database\Package bodies oddgen.txt");
             string[] unwrapped = plsqlUnwrapped.Split("\r\n/\r\n");
-            Dictionary<string, string> unwrappedElements = new Dictionary<string, string>();
+            Dictionary<string, string> unwrappedElements = [];
 
             foreach (string unwrap in unwrapped)
             {
                 if (string.IsNullOrWhiteSpace(unwrap))
                     continue;
 
-                Match m = Regex.Match(unwrap, @"CREATE\s+(OR\s+REPLACE\s+)?(PROCEDURE|FUNCTION|PACKAGE BODY)\s+(\w+)");
+                Match m = PackageBodyRegex3().Match(unwrap);
                 string name = m.Groups[3].ToString();
-                unwrappedElements[name.ToUpperInvariant()] = unwrap.Substring(m.Groups[2].Index);
+                unwrappedElements[name.ToUpperInvariant()] = unwrap[m.Groups[2].Index..];
             }
 
             foreach (string name in wrappedElements.Keys)
             {
-                if (unwrappedElements.ContainsKey(name))
+                if (unwrappedElements.TryGetValue(name, out string? value))
                 {
                     File.WriteAllText($@"C:\Users\Robert\Documents\MCE\Projets\GitHub\PlSqlUnwrapper\PlSqlUnwrapper.UnitTests\TestFiles\PackageBodies\{name}.wrapped.txt", wrappedElements[name]);
-                    File.WriteAllText($@"C:\Users\Robert\Documents\MCE\Projets\GitHub\PlSqlUnwrapper\PlSqlUnwrapper.UnitTests\TestFiles\PackageBodies\{name}.txt", unwrappedElements[name]);
+                    File.WriteAllText($@"C:\Users\Robert\Documents\MCE\Projets\GitHub\PlSqlUnwrapper\PlSqlUnwrapper.UnitTests\TestFiles\PackageBodies\{name}.txt", value);
                 }
             }
         }
-
     }
 }

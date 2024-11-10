@@ -3,9 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlSqlUnwrapper", "PlSqlUnwrapper\PlSqlUnwrapper.csproj", "{91831E63-D891-41D6-9E08-2AD3BBC4F409}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlSqlUnwrapper.UnitTests", "PlSqlUnwrapper.UnitTests\PlSqlUnwrapper.UnitTests.csproj", "{22F74BC0-0B1C-43D0-8E24-C77DBE4DC2CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlSqlUnwrapper.UnitTests", "PlSqlUnwrapper.UnitTests\PlSqlUnwrapper.UnitTests.csproj", "{22F74BC0-0B1C-43D0-8E24-C77DBE4DC2CD}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Elements", "Solution Elements", "{A2DCC0B5-66D5-4AA7-AC1F-DDE542DB7D85}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlSqlUnwrapper", "PlSqlUnwrapper\PlSqlUnwrapper.csproj", "{8B28D77D-C2C6-4D25-AB06-18B099B7002F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +20,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{91831E63-D891-41D6-9E08-2AD3BBC4F409}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{91831E63-D891-41D6-9E08-2AD3BBC4F409}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{91831E63-D891-41D6-9E08-2AD3BBC4F409}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{91831E63-D891-41D6-9E08-2AD3BBC4F409}.Release|Any CPU.Build.0 = Release|Any CPU
 		{22F74BC0-0B1C-43D0-8E24-C77DBE4DC2CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{22F74BC0-0B1C-43D0-8E24-C77DBE4DC2CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22F74BC0-0B1C-43D0-8E24-C77DBE4DC2CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22F74BC0-0B1C-43D0-8E24-C77DBE4DC2CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B28D77D-C2C6-4D25-AB06-18B099B7002F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B28D77D-C2C6-4D25-AB06-18B099B7002F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B28D77D-C2C6-4D25-AB06-18B099B7002F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B28D77D-C2C6-4D25-AB06-18B099B7002F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
