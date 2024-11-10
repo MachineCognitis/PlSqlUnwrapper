@@ -42,7 +42,7 @@ HQrJ6ceqqsLh5Gs63gvHZtDzzoUwg8eZgcfLCNL+XlquYvRyoVb6R4JfltE+l0cM6ufAsr2y
 m17nx3TAM7h0ZQmldIsJaedtKMu9m9LHB5n2BKsEEaPHrb5FEpKo2boxxRatSejtw8I5GBVf
 rPKjx76SvhZTmEDb+FdAMJKIFQKIpjusSSY=";
 
-        string unwrappedPlSql = PlSqlUnwrapper.Unwrap(wrappedPlSql, Encoding.Latin1).Replace("\n", "\r\n").TrimEnd('\0');
+        string unwrappedPlSql = PlSqlUnwrapper.Unwrap(wrappedPlSql, Encoding.Latin1).Replace("\n", "\r\n");
 
         Assert.AreEqual(unwrappedPlSql, 
 @"FUNCTION get_latin1_string RETURN VARCHAR2 IS
